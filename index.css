@@ -1,0 +1,26 @@
+html {
+  color-scheme: dark light;
+}
+
+.menu {
+  display: inline-block;
+  min-width: 150px;
+  margin: 4px 0 0 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid gray;
+  background: lightgray;
+}
+
+.item {
+  padding: 2px 5px;
+  outline: none;
+  cursor: default;
+  color: black;
+  background: transparent;
+}
+
+.item.focused {
+  background: gray;
+  color: white;
+}
