@@ -12,7 +12,7 @@ export function PopoverProvider({children, ...value}) {
 }
 
 export function Popover(props) {
-  let {popoverRef, triggerRef, state} = useContext(PopoverContext);
+  let {popoverRef, triggerRef, preserveChildren, restoreFocus = true, state} = useContext(PopoverContext);
   let ref = useRef();
   popoverRef = popoverRef || ref;
   let { isOpen = state.isOpen, children, onClose = state.close } = props;
@@ -23,7 +23,10 @@ export function Popover(props) {
   // let { dialogProps } = useDialog(props, popoverRef);
 
   if (!isOpen) {
-    return <div hidden>{children}</div>;
+    if (preserveChildren) {
+      return <div hidden>{children}</div>;
+    }
+    return null;
   }
 
   return (
@@ -33,12 +36,13 @@ export function Popover(props) {
         onClose={onClose}
         triggerRef={triggerRef}
         popoverRef={popoverRef}
+        restoreFocus={restoreFocus}
         placement={props.placement}>{children}</Overlay>
     </OverlayContainer>
   );
 }
 
-function Overlay({children, isOpen, onClose, triggerRef, popoverRef, placement}) {
+function Overlay({children, isOpen, onClose, triggerRef, popoverRef, placement, restoreFocus}) {
   // Handle events that should cause the popup to close,
   // e.g. blur, clicking outside, or pressing the escape key.
   let { overlayProps } = useOverlay(
@@ -64,7 +68,7 @@ function Overlay({children, isOpen, onClose, triggerRef, popoverRef, placement})
   });
 
   return (
-    <FocusScope restoreFocus>
+    <FocusScope restoreFocus={restoreFocus}>
       <div
         {...mergeProps(overlayProps, positionProps, modalProps)}
         ref={popoverRef}>

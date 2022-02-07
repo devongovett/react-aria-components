@@ -5,9 +5,13 @@ import clsx from 'clsx';
 import {OverlayProvider} from 'react-aria';
 import {Select, Value} from './Select';
 import {ListBox} from './ListBox';
-import {ComboBox, Input} from './ComboBox';
+import {ComboBox} from './ComboBox';
+import {Input} from './Input';
 import {Label} from './Label';
 import {Slider, Track, Thumb, Output} from './Slider';
+import {DialogTrigger, Modal, Dialog} from './Dialog';
+import {TooltipTrigger, Tooltip} from './Tooltip';
+import {NumberField, Group, IncrementButton, DecrementButton} from './NumberField';
 
 export function App() {
   return (
@@ -86,6 +90,88 @@ export function App() {
           <CustomThumb index={1} />
         </Track>
       </Slider>
+      <NumberField>
+        <Label>Test</Label>
+        <Group style={{display: 'flex'}}>
+          <DecrementButton>-</DecrementButton>
+          <Input />
+          <IncrementButton>+</IncrementButton>
+        </Group>
+      </NumberField>
+      <DialogTrigger>
+        <Button>Open modal</Button>
+        <Modal
+          style={{
+            position: 'fixed',
+            zIndex: 100,
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+          <Dialog style={{
+            background: 'Canvas',
+            color: 'CanvasText',
+            border: '1px solid gray',
+            padding: 30
+          }}>
+            {({close}) => (
+              <form style={{display: 'flex', flexDirection: 'column'}}>
+                <label>
+                  First Name: <input placeholder="John" />
+                </label>
+                <label>
+                  Last Name: <input placeholder="Smith" />
+                </label>
+                <Button onPress={close} style={{marginTop: 10}}>
+                  Submit
+                </Button>
+              </form>
+            )}
+          </Dialog>
+        </Modal>
+      </DialogTrigger>
+      <DialogTrigger>
+        <Button>Open popover</Button>
+        <Popover placement="bottom start">
+          <Dialog style={{
+            background: 'Canvas',
+            color: 'CanvasText',
+            border: '1px solid gray',
+            padding: 30
+          }}>
+            {({close}) => (
+              <form style={{display: 'flex', flexDirection: 'column'}}>
+                <label>
+                  First Name: <input placeholder="John" />
+                </label>
+                <label>
+                  Last Name: <input placeholder="Smith" />
+                </label>
+                <Button onPress={close} style={{marginTop: 10}}>
+                  Submit
+                </Button>
+              </form>
+            )}
+          </Dialog>
+        </Popover>
+      </DialogTrigger>
+      <TooltipTrigger offset={5}>
+        <Button>Tooltip trigger</Button>
+        <Tooltip 
+          style={{
+            background: 'Canvas',
+            color: 'CanvasText',
+            border: '1px solid gray',
+            padding: 5
+          }}>
+          I am a tooltip
+        </Tooltip>
+      </TooltipTrigger>
     </OverlayProvider>
   );
 }

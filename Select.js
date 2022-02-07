@@ -1,7 +1,6 @@
 import {useRef, createContext, useContext, useState} from 'react';
 import {useSelectState} from 'react-stately';
 import {useSelect, HiddenSelect} from 'react-aria';
-import {PressResponder} from '@react-aria/interactions';
 import {PopoverProvider} from './Popover';
 import {ButtonProvider} from './Button';
 import {ListBoxProvider} from './ListBox';
@@ -40,7 +39,7 @@ export function Select(props) {
     }}>
       <LabelProvider {...labelProps} elementType="span">
         <ButtonProvider {...triggerProps} buttonRef={ref}>
-          <PopoverProvider state={state} triggerRef={ref}>
+          <PopoverProvider state={state} triggerRef={ref} preserveChildren>
             <ListBoxProvider state={state} setListBoxProps={setListBoxProps} {...menuProps}>
               {props.children}
             </ListBoxProvider>

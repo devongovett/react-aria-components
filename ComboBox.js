@@ -1,13 +1,11 @@
-import {useRef, createContext, useContext, useState, useEffect} from 'react';
+import {useRef, useState} from 'react';
 import {useComboBoxState} from 'react-stately';
 import {useComboBox, useFilter} from 'react-aria';
-import {PressResponder} from '@react-aria/interactions';
 import {PopoverProvider} from './Popover';
 import {ButtonProvider} from './Button';
 import {ListBoxProvider} from './ListBox';
 import {LabelProvider} from './Label';
-
-const ComboBoxContext = createContext();
+import {InputProvider} from './Input';
 
 export function ComboBox(props) {
   let [propsFromListBox, setListBoxProps] = useState(null);
@@ -44,29 +42,16 @@ export function ComboBox(props) {
   );
 
   return (
-    <ComboBoxContext.Provider value={{
-      state,
-      labelProps,
-      inputProps,
-      inputRef,
-    }}>
-      <LabelProvider {...labelProps}>
-        <ButtonProvider {...buttonProps} buttonRef={buttonRef}>
-          <PopoverProvider state={state} popoverRef={popoverRef} triggerRef={buttonRef}>
+    <LabelProvider {...labelProps}>
+      <ButtonProvider {...buttonProps} buttonRef={buttonRef}>
+        <InputProvider {...inputProps} inputRef={inputRef}>
+          <PopoverProvider state={state} popoverRef={popoverRef} triggerRef={buttonRef} preserveChildren>
             <ListBoxProvider state={state} setListBoxProps={setListBoxProps} {...listBoxProps} listBoxRef={listBoxRef}>
               {props.children}
             </ListBoxProvider>
           </PopoverProvider>
-        </ButtonProvider>
-      </LabelProvider>
-    </ComboBoxContext.Provider>
-  );
-}
-
-export function Input({children}) {
-  let {state, inputProps, inputRef} = useContext(ComboBoxContext);
-
-  return (
-    <input {...inputProps} ref={inputRef} />
+        </InputProvider>
+      </ButtonProvider>
+    </LabelProvider>
   );
 }

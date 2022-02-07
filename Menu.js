@@ -6,7 +6,7 @@ import {
   useMenuItem,
   useMenuTrigger,
 } from 'react-aria';
-import {PressResponder} from '@react-aria/interactions';
+import {ButtonProvider} from './Button';
 import {PopoverProvider} from './Popover';
 
 const MenuContext = createContext();
@@ -16,19 +16,17 @@ export function MenuTrigger(props) {
 
   let buttonRef = useRef();
   let {menuTriggerProps, menuProps} = useMenuTrigger({}, state, buttonRef);
-  let [button, ...otherChildren] = props.children;
 
   return (
     <MenuContext.Provider value={{
       menuProps,
       state
     }}>
-      <PressResponder {...menuTriggerProps} ref={buttonRef}>
-        {button}
-      </PressResponder>
-      <PopoverProvider state={state} triggerRef={buttonRef}>
-        {otherChildren}
-      </PopoverProvider>
+      <ButtonProvider {...menuTriggerProps} buttonRef={buttonRef}>
+        <PopoverProvider state={state} triggerRef={buttonRef} preserveChildren>
+          {props.children}
+        </PopoverProvider>
+      </ButtonProvider>
     </MenuContext.Provider>
   );
 }
