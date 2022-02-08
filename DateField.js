@@ -1,5 +1,5 @@
 import {useRef, createContext, useContext, cloneElement} from 'react';
-import {useDatePickerFieldState} from '@react-stately/datepicker';
+import {useDatePickerFieldState, useTimeFieldState} from '@react-stately/datepicker';
 import {useDateField, useDateSegment} from '@react-aria/datepicker';
 import {useLocale, FocusScope} from 'react-aria';
 import {createCalendar} from '@internationalized/date';
@@ -20,6 +20,28 @@ export function DateField(props) {
   let propsFromDatePicker = useContext(DateFieldProviderContext);
   let { locale } = useLocale();
   let state = useDatePickerFieldState({
+    ...props,
+    ...propsFromDatePicker,
+    locale,
+    createCalendar
+  });
+
+  let fieldRef = useRef();
+  let { labelProps, fieldProps } = useDateField({...props, label: 's'}, state, fieldRef);
+
+  return (
+    <DateFieldContext.Provider value={{state, fieldProps, fieldRef}}>
+      <LabelProvider {...labelProps}>
+        {props.children}
+      </LabelProvider>
+    </DateFieldContext.Provider>
+  );
+}
+
+export function TimeField(props) {
+  let propsFromDatePicker = useContext(DateFieldProviderContext);
+  let { locale } = useLocale();
+  let state = useTimeFieldState({
     ...props,
     ...propsFromDatePicker,
     locale,

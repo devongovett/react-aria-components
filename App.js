@@ -14,7 +14,7 @@ import {TooltipTrigger, Tooltip} from './Tooltip';
 import {NumberField, IncrementButton, DecrementButton} from './NumberField';
 import {Group} from './Group';
 import {Calendar, RangeCalendar, CalendarHeader, CalendarGrid, CalendarNextButton, CalendarPreviousButton} from './Calendar';
-import {DateField, DateInput, DateSegment} from './DateField';
+import {DateField, TimeField, DateInput, DateSegment} from './DateField';
 import {DatePicker, DateRangePicker, StartDateInput, EndDateInput} from './DatePicker';
 
 export function App() {
@@ -210,6 +210,12 @@ export function App() {
           {segment => <DateSegment segment={segment} className={clsx('segment', {placeholder: segment.isPlaceholder})} />}
         </DateInput>
       </DateField>
+      <TimeField>
+        <Label style={{display: 'block'}}>Time</Label>
+        <DateInput className="field">
+          {segment => <DateSegment segment={segment} className={clsx('segment', {placeholder: segment.isPlaceholder})} />}
+        </DateInput>
+      </TimeField>
       <DatePicker>
         <Label style={{display: 'block'}}>Date</Label>
         <Group style={{display: 'inline-flex'}}>
