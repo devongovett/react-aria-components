@@ -1,7 +1,7 @@
 import {useRef, createContext, useContext, useMemo} from 'react';
 import {useCalendarState, useRangeCalendarState} from '@react-stately/calendar';
 import {useCalendar, useRangeCalendar, useCalendarGrid, useCalendarCell} from '@react-aria/calendar';
-import {useLocale, VisuallyHidden, useDateFormatter} from 'react-aria';
+import {useLocale, VisuallyHidden, useDateFormatter, mergeProps} from 'react-aria';
 import {createCalendar, startOfWeek, getWeeksInMonth, isSameMonth} from '@internationalized/date';
 import {Button} from './Button';
 
@@ -18,10 +18,10 @@ const CalendarContext = createContext();
 
 export function Calendar(props) {
   let propsFromDatePicker = useContext(CalendarProviderContext);
+  props = mergeProps(propsFromDatePicker, props);
   let { locale } = useLocale();
   let state = useCalendarState({
     ...props,
-    ...propsFromDatePicker,
     locale,
     createCalendar
   });
@@ -50,10 +50,11 @@ export function Calendar(props) {
 }
 
 export function RangeCalendar(props) {
+  let propsFromDatePicker = useContext(CalendarProviderContext);
+  props = mergeProps(propsFromDatePicker, props);
   let { locale } = useLocale();
   let state = useRangeCalendarState({
     ...props,
-    //...propsFromDatePicker,
     locale,
     createCalendar
   });

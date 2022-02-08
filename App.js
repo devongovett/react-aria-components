@@ -15,7 +15,7 @@ import {NumberField, IncrementButton, DecrementButton} from './NumberField';
 import {Group} from './Group';
 import {Calendar, RangeCalendar, CalendarHeader, CalendarGrid, CalendarNextButton, CalendarPreviousButton} from './Calendar';
 import {DateField, DateInput, DateSegment} from './DateField';
-import {DatePicker} from './DatePicker';
+import {DatePicker, DateRangePicker, StartDateInput, EndDateInput} from './DatePicker';
 
 export function App() {
   return (
@@ -240,6 +240,42 @@ export function App() {
           </Calendar>
         </Popover>
       </DatePicker>
+      <DateRangePicker>
+        <Label style={{display: 'block'}}>Date</Label>
+        <Group style={{display: 'inline-flex'}}>
+          <div className="field">
+            <StartDateInput style={{display: 'inline-flex'}}>
+              {segment => <DateSegment segment={segment} className={clsx('segment', {placeholder: segment.isPlaceholder})} />}
+            </StartDateInput>
+            <span style={{padding: '0 4px'}}>–</span>
+            <EndDateInput style={{display: 'inline-flex'}}>
+              {segment => <DateSegment segment={segment} className={clsx('segment', {placeholder: segment.isPlaceholder})} />}
+            </EndDateInput>
+          </div>
+          <Button>🗓</Button>
+        </Group>
+        <Popover placement="bottom start" style={{
+          background: 'Canvas',
+          color: 'CanvasText',
+          border: '1px solid gray',
+          padding: 20
+        }}>
+          <RangeCalendar style={{width: 220}}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <CalendarPreviousButton>&lt;</CalendarPreviousButton>
+              <CalendarHeader style={{ flex: 1, textAlign: 'center' }} />
+              <CalendarNextButton>&gt;</CalendarNextButton>
+            </div>
+            <CalendarGrid style={{ width: "100%" }}>
+              {({ formattedDate, isSelected, isOutsideMonth }) => (
+                <div hidden={isOutsideMonth} style={{textAlign: 'center', cursor: 'default', background: isSelected ? 'blue' : ''}}>
+                  {formattedDate}
+                </div>
+              )}
+            </CalendarGrid>
+          </RangeCalendar>
+        </Popover>
+      </DateRangePicker>
     </OverlayProvider>
   );
 }
