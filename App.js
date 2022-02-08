@@ -11,7 +11,11 @@ import {Label} from './Label';
 import {Slider, Track, Thumb, Output} from './Slider';
 import {DialogTrigger, Modal, Dialog} from './Dialog';
 import {TooltipTrigger, Tooltip} from './Tooltip';
-import {NumberField, Group, IncrementButton, DecrementButton} from './NumberField';
+import {NumberField, IncrementButton, DecrementButton} from './NumberField';
+import {Group} from './Group';
+import {Calendar, RangeCalendar, CalendarHeader, CalendarGrid, CalendarNextButton, CalendarPreviousButton} from './Calendar';
+import {DateField, DateInput, DateSegment} from './DateField';
+import {DatePicker} from './DatePicker';
 
 export function App() {
   return (
@@ -172,6 +176,70 @@ export function App() {
           I am a tooltip
         </Tooltip>
       </TooltipTrigger>
+      <Calendar style={{width: 220}}>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <CalendarPreviousButton>&lt;</CalendarPreviousButton>
+          <CalendarHeader style={{ flex: 1, textAlign: 'center' }} />
+          <CalendarNextButton>&gt;</CalendarNextButton>
+        </div>
+        <CalendarGrid style={{ width: "100%" }}>
+          {({ formattedDate, isSelected, isOutsideMonth }) => (
+            <div hidden={isOutsideMonth} style={{textAlign: 'center', cursor: 'default', background: isSelected ? 'blue' : ''}}>
+              {formattedDate}
+            </div>
+          )}
+        </CalendarGrid>
+      </Calendar>
+      <RangeCalendar style={{width: 220}}>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <CalendarPreviousButton>&lt;</CalendarPreviousButton>
+          <CalendarHeader style={{ flex: 1, textAlign: 'center' }} />
+          <CalendarNextButton>&gt;</CalendarNextButton>
+        </div>
+        <CalendarGrid style={{ width: "100%" }}>
+          {({ formattedDate, isSelected, isOutsideMonth }) => (
+            <div hidden={isOutsideMonth} style={{textAlign: 'center', cursor: 'default', background: isSelected ? 'blue' : ''}}>
+              {formattedDate}
+            </div>
+          )}
+        </CalendarGrid>
+      </RangeCalendar>
+      <DateField>
+        <Label style={{display: 'block'}}>Date</Label>
+        <DateInput className="field">
+          {segment => <DateSegment segment={segment} className={clsx('segment', {placeholder: segment.isPlaceholder})} />}
+        </DateInput>
+      </DateField>
+      <DatePicker>
+        <Label style={{display: 'block'}}>Date</Label>
+        <Group style={{display: 'inline-flex'}}>
+          <DateInput className="field">
+            {segment => <DateSegment segment={segment} className={clsx('segment', {placeholder: segment.isPlaceholder})} />}
+          </DateInput>
+          <Button>🗓</Button>
+        </Group>
+        <Popover placement="bottom start" style={{
+          background: 'Canvas',
+          color: 'CanvasText',
+          border: '1px solid gray',
+          padding: 20
+        }}>
+          <Calendar style={{width: 220}}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <CalendarPreviousButton>&lt;</CalendarPreviousButton>
+              <CalendarHeader style={{ flex: 1, textAlign: 'center' }} />
+              <CalendarNextButton>&gt;</CalendarNextButton>
+            </div>
+            <CalendarGrid style={{ width: "100%" }}>
+              {({ formattedDate, isSelected, isOutsideMonth }) => (
+                <div hidden={isOutsideMonth} style={{textAlign: 'center', cursor: 'default', background: isSelected ? 'blue' : ''}}>
+                  {formattedDate}
+                </div>
+              )}
+            </CalendarGrid>
+          </Calendar>
+        </Popover>
+      </DatePicker>
     </OverlayProvider>
   );
 }

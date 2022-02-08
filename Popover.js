@@ -37,12 +37,14 @@ export function Popover(props) {
         triggerRef={triggerRef}
         popoverRef={popoverRef}
         restoreFocus={restoreFocus}
-        placement={props.placement}>{children}</Overlay>
+        placement={props.placement}
+        style={props.style}
+        className={props.className}>{children}</Overlay>
     </OverlayContainer>
   );
 }
 
-function Overlay({children, isOpen, onClose, triggerRef, popoverRef, placement, restoreFocus}) {
+function Overlay({children, isOpen, onClose, triggerRef, popoverRef, placement, restoreFocus, className, style}) {
   // Handle events that should cause the popup to close,
   // e.g. blur, clicking outside, or pressing the escape key.
   let { overlayProps } = useOverlay(
@@ -66,12 +68,16 @@ function Overlay({children, isOpen, onClose, triggerRef, popoverRef, placement, 
   let { modalProps } = useModal({
     isDisabled: !isOpen
   });
+  
+  style = {...style, ...positionProps.style};
 
   return (
     <FocusScope restoreFocus={restoreFocus}>
       <div
         {...mergeProps(overlayProps, positionProps, modalProps)}
-        ref={popoverRef}>
+        ref={popoverRef}
+        className={className}
+        style={style}>
         <DismissButton onDismiss={onClose} />
         {children}
         <DismissButton onDismiss={onClose} />

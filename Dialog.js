@@ -4,6 +4,15 @@ import {useDialog, useOverlayTrigger, FocusScope, usePreventScroll, OverlayConta
 import {ButtonProvider} from './Button';
 import {PopoverProvider} from './Popover';
 
+const DialogProviderContext = createContext();
+export function DialogProvider({children, ...value}) {
+  return (
+    <DialogProviderContext.Provider value={value}>
+      {children}
+    </DialogProviderContext.Provider>
+  );
+}
+
 const DialogContext = createContext();
 
 export function DialogTrigger(props) {
@@ -67,6 +76,7 @@ function ModalInner(props) {
 
 export function Dialog(props) {
   let {state, overlayProps, overlayRef} = useContext(DialogContext);
+  let propsFromContext = useContext(DialogProviderContext);
   let ref = useRef();
   overlayRef = overlayRef || ref;
   let {dialogProps} = useDialog(props, ref);
@@ -80,7 +90,7 @@ export function Dialog(props) {
   
   return (
     <FocusScope contain restoreFocus autoFocus>
-      <section {...mergeProps(overlayProps, dialogProps)} ref={overlayRef} style={props.style} className={props.className}>
+      <section {...mergeProps(overlayProps, dialogProps, propsFromContext)} ref={overlayRef} style={props.style} className={props.className}>
         <ButtonProvider>
           {children}
         </ButtonProvider>

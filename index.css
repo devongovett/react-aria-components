@@ -24,3 +24,40 @@ html {
   background: gray;
   color: white;
 }
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.field {
+  display: inline-flex;
+  padding: 2px 4px;
+  border-radius: 2px;
+  border: 1px solid gray;
+  background: Field;
+  color: FieldText;
+}
+
+.field:focus-within {
+  border-color: blue;
+}
+
+.segment {
+  padding: 0 2px;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.segment.placeholder {
+  color: gray;
+}
+
+.segment:focus {
+  color: white;
+  background: blue;
+  outline: none;
+  border-radius: 2px;
+  caret-color: transparent;
+}

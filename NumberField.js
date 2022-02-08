@@ -4,6 +4,7 @@ import {useNumberField, useLocale, mergeProps} from 'react-aria';
 import {InputProvider} from './Input';
 import {LabelProvider} from './Label';
 import {Button} from './Button';
+import {GroupProvider} from './Group';
 
 const NumberFieldContext = createContext();
 
@@ -20,22 +21,15 @@ export function NumberField(props) {
   } = useNumberField({...props, label: 's'}, state, inputRef);
   
   return (
-    <NumberFieldContext.Provider value={{state, groupProps, incrementButtonProps, decrementButtonProps}}>
-      <InputProvider {...inputProps} inputRef={inputRef}>
-        <LabelProvider {...labelProps}>
-          {props.children}
-        </LabelProvider>
-      </InputProvider>
+    <NumberFieldContext.Provider value={{state, incrementButtonProps, decrementButtonProps}}>
+      <GroupProvider {...groupProps}>
+        <InputProvider {...inputProps} inputRef={inputRef}>
+          <LabelProvider {...labelProps}>
+            {props.children}
+          </LabelProvider>
+        </InputProvider>
+      </GroupProvider>
     </NumberFieldContext.Provider>
-  );
-}
-
-export function Group({children, style, className}) {
-  let {groupProps} = useContext(NumberFieldContext);
-  return (
-    <div {...groupProps} style={style} className={className}>
-      {children}
-    </div>
   );
 }
 
