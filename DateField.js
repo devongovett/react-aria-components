@@ -1,27 +1,17 @@
 import {useRef, createContext, useContext, cloneElement} from 'react';
-import {useDatePickerFieldState, useTimeFieldState} from '@react-stately/datepicker';
+import {useDateFieldState, useTimeFieldState} from '@react-stately/datepicker';
 import {useDateField, useDateSegment} from '@react-aria/datepicker';
 import {useLocale, FocusScope} from 'react-aria';
 import {createCalendar} from '@internationalized/date';
-import {LabelProvider} from './Label';
+import {LabelContext} from './Label';
+import {Provider, useRenderProps} from './utils';
 
-const DateFieldProviderContext = createContext();
-export function DateFieldProvider({children, ...value}) {
-  return (
-    <DateFieldContext.Provider value={value}>
-      {children}
-    </DateFieldContext.Provider>
-  );
-}
-
-const DateFieldContext = createContext();
+export const DateFieldContext = createContext();
 
 export function DateField(props) {
-  let propsFromDatePicker = useContext(DateFieldProviderContext);
   let { locale } = useLocale();
-  let state = useDatePickerFieldState({
+  let state = useDateFieldState({
     ...props,
-    ...propsFromDatePicker,
     locale,
     createCalendar
   });
@@ -30,20 +20,19 @@ export function DateField(props) {
   let { labelProps, fieldProps } = useDateField({...props, label: 's'}, state, fieldRef);
 
   return (
-    <DateFieldContext.Provider value={{state, fieldProps, fieldRef}}>
-      <LabelProvider {...labelProps}>
-        {props.children}
-      </LabelProvider>
-    </DateFieldContext.Provider>
+    <Provider values={[
+      [DateFieldContext, {state, fieldProps, fieldRef}],
+      [LabelContext, labelProps]
+    ]}>
+      {props.children}
+    </Provider>
   );
 }
 
 export function TimeField(props) {
-  let propsFromDatePicker = useContext(DateFieldProviderContext);
   let { locale } = useLocale();
   let state = useTimeFieldState({
     ...props,
-    ...propsFromDatePicker,
     locale,
     createCalendar
   });
@@ -52,11 +41,12 @@ export function TimeField(props) {
   let { labelProps, fieldProps } = useDateField({...props, label: 's'}, state, fieldRef);
 
   return (
-    <DateFieldContext.Provider value={{state, fieldProps, fieldRef}}>
-      <LabelProvider {...labelProps}>
+    <Provider values={[
+      [DateFieldContext, {state, fieldProps, fieldRef}],
+      [LabelContext, labelProps]
+    ]}>
         {props.children}
-      </LabelProvider>
-    </DateFieldContext.Provider>
+    </Provider>
   );
 }
 
@@ -64,9 +54,7 @@ export function DateInput({children, style, className}) {
   let {state, fieldProps, fieldRef} = useContext(DateFieldContext);
   return (
     <div {...fieldProps} ref={fieldRef} style={style} className={className}>
-      <FocusScope>
-        {state.segments.map((segment, i) => cloneElement(children(segment), {key: i}))}
-      </FocusScope>
+      {state.segments.map((segment, i) => cloneElement(children(segment), {key: i}))}
     </div>
   );
 }
@@ -74,39 +62,19 @@ export function DateInput({children, style, className}) {
 export function DateSegment({ segment, className, style, children }) {
   let {state} = useContext(DateFieldContext);
   let ref = useRef();
-  let { segmentProps } = useDateSegment({}, segment, state, ref);
-  
-  if (typeof className === 'function') {
-    className = className({
-      segment,
-    });
-  }
-  
-  if (typeof style === 'function') {
-    style = style({
-      segment,
-    });
-  }
-  
-  if (typeof children === 'function') {
-    children = children({
-      segment,
-    });
-  } else if (children == null) {
-    children = segment.text;
-  }
-  
-  if (!segment.isEditable) {
-    return <div aria-hidden="true" ref={ref} className={className} style={style}>{children}</div>
-  }
+  let { segmentProps } = useDateSegment(segment, state, ref);
+  let renderProps = useRenderProps({
+    className,
+    style,
+    children,
+    values: {segment},
+    defaultChildren: segment.text
+  });
 
   return (
     <div
       {...segmentProps}
-      ref={ref}
-      className={className}
-      style={style}>
-      {children}
-    </div>
+      {...renderProps}
+      ref={ref} />
   );
 }

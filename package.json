@@ -1,14 +1,22 @@
 {
   "dependencies": {
-    "@react-aria/calendar": "^3.0.0-nightly.1394",
-    "@react-aria/datepicker": "^3.0.0-nightly.3085",
-    "@react-stately/calendar": "^3.0.0-nightly.1394",
-    "@react-stately/datepicker": "^3.0.0-nightly.1394",
+    "@react-aria/calendar": "nightly",
+    "@react-aria/datepicker": "nightly",
+    "@react-stately/calendar": "nightly",
+    "@react-stately/datepicker": "nightly",
     "clsx": "^1.1.1",
-    "parcel": "^2.0.0-nightly.991",
+    "lodash-es": "^4.17.21",
+    "parcel": "^2.6.0",
     "react": "^17.0.2",
-    "react-aria": "^3.12.1-nightly.3085",
+    "react-aria": "nightly",
     "react-dom": "^17.0.2",
-    "react-stately": "^3.11.1-nightly.3085"
+    "react-stately": "nightly"
+  },
+  "scripts": {
+    "start": "parcel index.html"
+  },
+  "devDependencies": {
+    "process": "^0.11.10",
+    "react-error-overlay": "6.0.9"
   }
 }

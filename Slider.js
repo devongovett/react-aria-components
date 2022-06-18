@@ -1,7 +1,8 @@
 import {useRef, createContext, useContext} from 'react';
 import {useSliderState} from 'react-stately';
-import {useNumberFormatter, useSlider, useSliderThumb, VisuallyHidden, mergeProps} from 'react-aria';
-import {LabelProvider} from './Label';
+import {useNumberFormatter, useSlider, useSliderThumb, VisuallyHidden, mergeProps, useFocusRing} from 'react-aria';
+import {LabelContext} from './Label';
+import {Provider, useRenderProps} from './utils';
 
 const SliderContext = createContext();
 
@@ -17,32 +18,34 @@ export function Slider(props) {
   } = useSlider({...props, label: 'd'}, state, trackRef);
 
   return (
-    <SliderContext.Provider value={{state, trackProps, trackRef, outputProps}}>
+    <Provider
+      values={[
+        [SliderContext, {state, trackProps, trackRef, outputProps}],
+        [LabelContext, labelProps]
+      ]}>
       <div
         {...groupProps}
         style={props.style}
         className={props.className}>
-        <LabelProvider {...labelProps}>
-          {props.children}
-        </LabelProvider>
+        {props.children}
       </div>
-    </SliderContext.Provider>
+    </Provider>
   );
 }
 
 export function Output({children, style, className}) {
   let {state, outputProps} = useContext(SliderContext);
-  if (typeof children === 'function') {
-    children = children(state);
-  } else if (children == null) {
-    children = state.getThumbValueLabel(0);
-  }
+  let renderProps = useRenderProps({
+    className,
+    style,
+    children,
+    defaultChildren: state.getThumbValueLabel(0),
+    values: state,
+  });
 
   return (
-    <output {...outputProps} style={style} className={className}>
-      {children}
-    </output>
-  )
+    <output {...outputProps} {...renderProps} />
+  );
 }
 
 export function Track({children, style, className}) {
@@ -70,37 +73,27 @@ export function Thumb(props) {
   }, state);
 
   let isDragging = state.isThumbDragging(index);
+  let {focusProps, isFocusVisible} = useFocusRing();
 
-  let className = props.className;
-  if (typeof className === 'function') {
-    className = className({
-      state,
-      isDragging
-    });
-  }
+  let renderProps = useRenderProps({
+    className: props.className,
+    style: props.style,
+    values: {state, isDragging, isFocusVisible},
+  });
 
-  let style = props.style;
-  if (typeof style === 'function') {
-    style = style({
-      state,
-      isDragging
-    });
-  }
-
-  // let { focusProps, isFocusVisible } = useFocusRing();
   return (
     <div
       {...thumbProps}
+      {...renderProps}
       style={{
         position: 'absolute',
         transform: 'translateX(-50%)',
         left: `${state.getThumbPercent(index) * 100}%`,
-        ...style
+        ...renderProps.style
       }}
-      className={props.className}
     >
       <VisuallyHidden>
-        <input ref={inputRef} {...mergeProps(inputProps)} />
+        <input ref={inputRef} {...mergeProps(inputProps, focusProps)} />
       </VisuallyHidden>
     </div>
   );

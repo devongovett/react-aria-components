@@ -1,15 +1,7 @@
 import {useRef, createContext, useContext} from 'react';
 import {useButton, mergeProps} from 'react-aria';
 
-const ButtonContext = createContext();
-
-export function ButtonProvider({children, ...value}) {
-  return (
-    <ButtonContext.Provider value={value}>
-      {children}
-    </ButtonContext.Provider>
-  );
-}
+export const ButtonContext = createContext();
 
 export function Button(props) {
   let bp = useContext(ButtonContext) || {};

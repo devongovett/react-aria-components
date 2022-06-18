@@ -1,19 +1,12 @@
 import {useRef, createContext, useContext} from 'react';
 import {useOverlayTriggerState} from 'react-stately';
 import {useDialog, useOverlayTrigger, FocusScope, usePreventScroll, OverlayContainer, useOverlay, useModal, mergeProps} from 'react-aria';
-import {ButtonProvider} from './Button';
-import {PopoverProvider} from './Popover';
+import {ButtonContext} from './Button';
+import {PopoverContext} from './Popover';
+import {Provider} from './utils';
 
-const DialogProviderContext = createContext();
-export function DialogProvider({children, ...value}) {
-  return (
-    <DialogProviderContext.Provider value={value}>
-      {children}
-    </DialogProviderContext.Provider>
-  );
-}
-
-const DialogContext = createContext();
+export const DialogContext = createContext();
+const InternalDialogContext = createContext();
 
 export function DialogTrigger(props) {
   let state = useOverlayTriggerState(props);
@@ -22,21 +15,19 @@ export function DialogTrigger(props) {
   let {triggerProps, overlayProps} = useOverlayTrigger({type: 'dialog'}, state, buttonRef);
 
   return (
-    <DialogContext.Provider value={{
-      overlayProps,
-      state
-    }}>
-      <ButtonProvider {...triggerProps} onPress={() => state.open()} buttonRef={buttonRef}>
-        <PopoverProvider state={state} triggerRef={buttonRef} restoreFocus={false}>
-          {props.children}
-        </PopoverProvider>
-      </ButtonProvider>
-    </DialogContext.Provider>
+    <Provider
+      values={[
+        [InternalDialogContext, {state, overlayProps}],
+        [ButtonContext, {...triggerProps, onPress: () => state.open(), buttonRef}],
+        [PopoverContext, {state, triggerRef: buttonRef, restoreFocus: false}]
+      ]}>
+      {props.children}
+    </Provider>
   );
 }
 
 export function Modal(props) {
-  let {state} = useContext(DialogContext);
+  let {state} = useContext(InternalDialogContext);
   if (!state.isOpen) {
     return null;
   }
@@ -49,7 +40,7 @@ export function Modal(props) {
 }
 
 function ModalInner(props) {
-  let {state, overlayProps: ctxOverlayProps} = useContext(DialogContext);
+  let {state, overlayProps: ctxOverlayProps} = useContext(InternalDialogContext);
     
   let ref = useRef();
   let {overlayProps, underlayProps} = useOverlay({
@@ -63,20 +54,20 @@ function ModalInner(props) {
   
   return (
     <div {...underlayProps} style={props.style} className={props.className}>
-      <DialogContext.Provider value={{
+      <InternalDialogContext.Provider value={{
         overlayProps: mergeProps(ctxOverlayProps, overlayProps, modalProps),
         state,
         overlayRef: ref
       }}>
         {props.children}
-      </DialogContext.Provider>
+      </InternalDialogContext.Provider>
     </div>
   );
 }
 
 export function Dialog(props) {
-  let {state, overlayProps, overlayRef} = useContext(DialogContext);
-  let propsFromContext = useContext(DialogProviderContext);
+  let {state, overlayProps, overlayRef} = useContext(InternalDialogContext);
+  let propsFromContext = useContext(DialogContext);
   let ref = useRef();
   overlayRef = overlayRef || ref;
   let {dialogProps} = useDialog(props, ref);
@@ -91,9 +82,9 @@ export function Dialog(props) {
   return (
     <FocusScope contain restoreFocus autoFocus>
       <section {...mergeProps(overlayProps, dialogProps, propsFromContext)} ref={overlayRef} style={props.style} className={props.className}>
-        <ButtonProvider>
+        <ButtonContext.Provider value={{}}>
           {children}
-        </ButtonProvider>
+        </ButtonContext.Provider>
       </section>
     </FocusScope>
   );

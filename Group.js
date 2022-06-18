@@ -1,14 +1,6 @@
 import {createContext, useContext} from 'react';
 
-const GroupContext = createContext();
-
-export function GroupProvider({children, ...value}) {
-  return (
-    <GroupContext.Provider value={value}>
-      {children}
-    </GroupContext.Provider>
-  )
-}
+export const GroupContext = createContext();
 
 export function Group({children, style, className}) {
   let {groupRef, ...groupProps} = useContext(GroupContext) || {};

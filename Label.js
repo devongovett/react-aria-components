@@ -1,15 +1,7 @@
 import {createContext, useContext} from 'react';
 import {mergeProps} from 'react-aria';
 
-const LabelContext = createContext();
-
-export function LabelProvider({children, ...value}) {
-  return (
-    <LabelContext.Provider value={value}>
-      {children}
-    </LabelContext.Provider>
-  );
-}
+export const LabelContext = createContext();
 
 export function Label(props) {
   let context = useContext(LabelContext) || {};

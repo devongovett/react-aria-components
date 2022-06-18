@@ -1,10 +1,11 @@
 import {useRef, createContext, useContext} from 'react';
 import {useNumberFieldState} from 'react-stately';
 import {useNumberField, useLocale, mergeProps} from 'react-aria';
-import {InputProvider} from './Input';
-import {LabelProvider} from './Label';
+import {InputContext} from './Input';
+import {LabelContext} from './Label';
 import {Button} from './Button';
-import {GroupProvider} from './Group';
+import {GroupContext} from './Group';
+import {Provider} from './utils';
 
 const NumberFieldContext = createContext();
 
@@ -21,15 +22,15 @@ export function NumberField(props) {
   } = useNumberField({...props, label: 's'}, state, inputRef);
   
   return (
-    <NumberFieldContext.Provider value={{state, incrementButtonProps, decrementButtonProps}}>
-      <GroupProvider {...groupProps}>
-        <InputProvider {...inputProps} inputRef={inputRef}>
-          <LabelProvider {...labelProps}>
-            {props.children}
-          </LabelProvider>
-        </InputProvider>
-      </GroupProvider>
-    </NumberFieldContext.Provider>
+    <Provider
+      values={[
+        [NumberFieldContext, {state, incrementButtonProps, decrementButtonProps}],
+        [GroupContext, groupProps],
+        [InputContext, {...inputProps, inputRef}],
+        [LabelContext, labelProps]
+      ]}>
+      {props.children}
+    </Provider>
   );
 }
 

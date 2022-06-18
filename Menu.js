@@ -6,8 +6,9 @@ import {
   useMenuItem,
   useMenuTrigger,
 } from 'react-aria';
-import {ButtonProvider} from './Button';
-import {PopoverProvider} from './Popover';
+import {ButtonContext} from './Button';
+import {PopoverContext} from './Popover';
+import {Provider, useRenderProps} from './utils';
 
 const MenuContext = createContext();
 
@@ -18,16 +19,14 @@ export function MenuTrigger(props) {
   let {menuTriggerProps, menuProps} = useMenuTrigger({}, state, buttonRef);
 
   return (
-    <MenuContext.Provider value={{
-      menuProps,
-      state
-    }}>
-      <ButtonProvider {...menuTriggerProps} buttonRef={buttonRef}>
-        <PopoverProvider state={state} triggerRef={buttonRef} preserveChildren>
-          {props.children}
-        </PopoverProvider>
-      </ButtonProvider>
-    </MenuContext.Provider>
+    <Provider
+      values={[
+        [MenuContext, {menuProps, state}],
+        [ButtonContext, {...menuTriggerProps, buttonRef}],
+        [PopoverContext, {state, triggerRef: buttonRef}]
+      ]}>
+      {props.children}
+    </Provider>
   );
 }
 
@@ -72,40 +71,21 @@ function MenuItem({item, state, onAction, onClose}) {
     onClose
   }, state, ref);
 
-  let className = item.props.className;
-  if (typeof className === 'function') {
-    className = className({
+  let renderProps = useRenderProps({
+    className: item.props.className,
+    style: item.props.style,
+    children: item.rendered,
+    values: {
       isFocused,
       isSelected,
       isDisabled
-    });
-  }
-
-  let style = item.props.style;
-  if (typeof style === 'function') {
-    style = style({
-      isFocused,
-      isSelected,
-      isDisabled
-    });
-  }
-
-  let rendered = item.rendered;
-  if (typeof rendered === 'function') {
-    rendered = rendered({
-      isFocused,
-      isSelected,
-      isDisabled
-    });
-  }
+    }
+  });
 
   return (
     <li
       {...menuItemProps}
-      ref={ref}
-      style={style}
-      className={className}>
-      {rendered}
-    </li>
+      {...renderProps}
+      ref={ref} />
   );
 }

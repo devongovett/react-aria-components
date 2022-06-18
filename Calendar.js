@@ -1,23 +1,16 @@
-import {useRef, createContext, useContext, useMemo} from 'react';
+import {useRef, cloneElement, createContext, useContext, useMemo} from 'react';
 import {useCalendarState, useRangeCalendarState} from '@react-stately/calendar';
 import {useCalendar, useRangeCalendar, useCalendarGrid, useCalendarCell} from '@react-aria/calendar';
 import {useLocale, VisuallyHidden, useDateFormatter, mergeProps} from 'react-aria';
-import {createCalendar, startOfWeek, getWeeksInMonth, isSameMonth} from '@internationalized/date';
+import {createCalendar, startOfWeek, getWeeksInMonth} from '@internationalized/date';
 import {Button} from './Button';
+import {useRenderProps} from './utils';
 
-const CalendarProviderContext = createContext();
-export function CalendarProvider({children, ...value}) {
-  return (
-    <CalendarProviderContext.Provider value={value}>
-      {children}
-    </CalendarProviderContext.Provider>
-  );
-}
-
-const CalendarContext = createContext();
+export const CalendarContext = createContext();
+const InternalCalendarContext = createContext();
 
 export function Calendar(props) {
-  let propsFromDatePicker = useContext(CalendarProviderContext);
+  let propsFromDatePicker = useContext(CalendarContext);
   props = mergeProps(propsFromDatePicker, props);
   let { locale } = useLocale();
   let state = useCalendarState({
@@ -27,7 +20,7 @@ export function Calendar(props) {
   });
 
   let ref = useRef();
-  let { calendarProps, prevButtonProps, nextButtonProps } = useCalendar(
+  let { calendarProps, prevButtonProps, nextButtonProps, title } = useCalendar(
     props,
     state,
     ref
@@ -35,22 +28,29 @@ export function Calendar(props) {
 
   return (
     <div {...calendarProps} ref={ref} style={props.style} className={props.className}>
-      <CalendarContext.Provider
+      <InternalCalendarContext.Provider
         value={{
           state,
+          title,
           calendarProps,
           prevButtonProps,
           nextButtonProps
         }}
       >
+        <VisuallyHidden>
+          <h2>{calendarProps['aria-label']}</h2>
+        </VisuallyHidden>
         {props.children}
-      </CalendarContext.Provider>
+        <VisuallyHidden>
+          <button aria-label={nextButtonProps['aria-label']} onClick={() => state.focusNextPage()} />
+        </VisuallyHidden>
+      </InternalCalendarContext.Provider>
     </div>
   );
 }
 
 export function RangeCalendar(props) {
-  let propsFromDatePicker = useContext(CalendarProviderContext);
+  let propsFromDatePicker = useContext(CalendarContext);
   props = mergeProps(propsFromDatePicker, props);
   let { locale } = useLocale();
   let state = useRangeCalendarState({
@@ -60,7 +60,7 @@ export function RangeCalendar(props) {
   });
   
   let ref = useRef();
-  let { calendarProps, prevButtonProps, nextButtonProps } = useRangeCalendar(
+  let { calendarProps, prevButtonProps, nextButtonProps, title } = useRangeCalendar(
     props,
     state,
     ref
@@ -68,56 +68,53 @@ export function RangeCalendar(props) {
   
   return (
     <div {...calendarProps} ref={ref} style={props.style} className={props.className}>
-      <CalendarContext.Provider
+      <InternalCalendarContext.Provider
         value={{
           state,
+          title,
           calendarProps,
           prevButtonProps,
           nextButtonProps
         }}
       >
+        <VisuallyHidden>
+          <h2>{calendarProps['aria-label']}</h2>
+        </VisuallyHidden>
         {props.children}
-      </CalendarContext.Provider>
+        <VisuallyHidden>
+          <button aria-label={nextButtonProps['aria-label']} onClick={() => state.focusNextPage()} />
+        </VisuallyHidden>
+      </InternalCalendarContext.Provider>
     </div>
   );
 }
 
-export function CalendarHeader({ children, style, className }) {
-  let { state } = useContext(CalendarContext);
-  let currentMonth = state.visibleRange.start;
-  let monthDateFormatter = useDateFormatter({
-    month: "long",
-    year: "numeric",
-    era: currentMonth.calendar.identifier !== "gregory" ? "long" : undefined,
-    calendar: currentMonth.calendar.identifier
+export function CalendarHeader(props) {
+  let { state, title } = useContext(InternalCalendarContext);
+  let renderProps = useRenderProps({
+    ...props,
+    values: {state},
+    defaultChildren: title
   });
-  
-  if (typeof children === 'function') {
-    children = children(state);
-  } else if (children == null) {
-    children = monthDateFormatter.format(currentMonth.toDate(state.timeZone));
-  }
 
   return (
-    <h2 style={style} className={className}>
-      {children}
-    </h2>
+    <h2 aria-hidden="true" {...renderProps} />
   );
 }
 
 export function CalendarPreviousButton({ children }) {
-  let { prevButtonProps } = useContext(CalendarContext);
+  let { prevButtonProps } = useContext(InternalCalendarContext);
   return <Button {...prevButtonProps}>{children}</Button>;
 }
 
 export function CalendarNextButton({ children }) {
-  let { nextButtonProps } = useContext(CalendarContext);
+  let { nextButtonProps } = useContext(InternalCalendarContext);
   return <Button {...nextButtonProps}>{children}</Button>;
 }
 
 export function CalendarGrid(props) {
-  let { state } = useContext(CalendarContext);
-  let { gridProps } = useCalendarGrid(props, state);
+  let { state } = useContext(InternalCalendarContext);
+  let { gridProps, headerProps, weekDays } = useCalendarGrid(props, state);
   let { locale } = useLocale();
 
   let startDate = state.visibleRange.start;
@@ -127,26 +124,11 @@ export function CalendarGrid(props) {
   let monthStart = startOfWeek(startDate, locale);
   let weeksInMonth = getWeeksInMonth(startDate, locale);
 
-  let dayFormatter = useDateFormatter({ weekday: "narrow" });
-  let dayFormatterLong = useDateFormatter({ weekday: "long" });
-
   return (
     <table {...gridProps} style={props.style}>
-      <thead>
+      <thead {...headerProps}>
         <tr>
-          {[...new Array(7).keys()].map((index) => {
-            let date = monthStart.add({ days: index });
-            let dateDay = date.toDate(state.timeZone);
-            let day = dayFormatter.format(dateDay);
-            let dayLong = dayFormatterLong.format(dateDay);
-            return (
-              <th key={index}>
-                {/* Make sure screen readers read the full day name, but we show an abbreviation visually. */}
-                <VisuallyHidden>{dayLong}</VisuallyHidden>
-                <span aria-hidden="true">{day}</span>
-              </th>
-            );
-          })}
+          {weekDays.map((day, index) => <th key={index}>{day}</th>)}
         </tr>
       </thead>
       <tbody>
@@ -170,38 +152,27 @@ export function CalendarGrid(props) {
 
 function CalendarCell({ state, date, currentMonth, render }) {
   let ref = useRef();
-  let { cellProps, buttonProps, isPressed } = useCalendarCell(
+  let { cellProps, buttonProps, isPressed, isSelected, isFocused, isOutsideVisibleRange, isUnavailable, isInvalid, formattedDate } = useCalendarCell(
     {date},
     state,
     ref
   );
 
-  let dateFormatter = useDateFormatter({
-    day: "numeric",
-    timeZone: state.timeZone,
-    calendar: currentMonth.calendar.identifier
+  let button = render({
+    formattedDate,
+    date,
+    isPressed,
+    isSelected,
+    isFocused,
+    isOutsideVisibleRange,
+    isUnavailable,
   });
 
-  let nativeDate = useMemo(() => date.toDate(state.timeZone), [
-    date,
-    state.timeZone
-  ]);
-  let formatted = useMemo(() => dateFormatter.format(nativeDate), [
-    dateFormatter,
-    nativeDate
-  ]);
-
+  // Bad idea to cloneElement here? What if element doesn't pass through DOM props?
+  // Also, two DOM elements... impossible to style <td>
   return (
     <td {...cellProps}>
-      <div {...buttonProps} ref={ref}>
-        {render({
-          formattedDate: formatted,
-          date,
-          isPressed,
-          isSelected: state.isSelected(date),
-          isOutsideMonth: !isSameMonth(date, currentMonth)
-        })}
-      </div>
+      {cloneElement(button, mergeProps(button.props, buttonProps, {ref}))}
     </td>
   );
 }

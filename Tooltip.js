@@ -2,6 +2,7 @@ import {useRef, createContext, useContext} from 'react';
 import {useTooltipTriggerState} from 'react-stately';
 import {useTooltipTrigger, useTooltip, useOverlayPosition, OverlayContainer, mergeProps} from 'react-aria';
 import {FocusableProvider} from '@react-aria/focus';
+import {useRenderProps} from './utils';
 
 const TooltipContext = createContext();
 
@@ -44,29 +45,19 @@ export function Tooltip(props) {
 
 function TooltipInner(props) {
   let {state, overlayRef, overlayProps, placement} = useContext(TooltipContext);
-  
-  let className = props.className;
-  if (typeof className === 'function') {
-    className = className({placement});
-  }
-  
-  let style = props.style;
-  if (typeof style === 'function') {
-    style = style({placement});
-  }
-  
-  let children = props.children;
-  if (typeof children === 'function') {
-    children = children({placement});
-  }
+
+  let renderProps = useRenderProps({
+    ...props,
+    values: {
+      placement
+    }
+  });
   
   props = mergeProps(props, overlayProps);
   let {tooltipProps} = useTooltip(props, state);
     
   return (
-    <span {...tooltipProps} ref={overlayRef} style={{...style, ...overlayProps.style}} className={className}>
-      {props.children}
-    </span>
+    <span {...tooltipProps} ref={overlayRef} {...renderProps} style={{...renderProps.style, ...overlayProps.style}} />
   );
 }
 

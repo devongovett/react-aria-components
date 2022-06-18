@@ -1,15 +1,16 @@
 import {useRef, createContext, useContext} from 'react';
-import {useDatePickerState, useDatePickerFieldState, useDateRangePickerState} from '@react-stately/datepicker';
+import {useDatePickerState, useDateFieldState, useDateRangePickerState} from '@react-stately/datepicker';
 import {useDatePicker, useDateRangePicker, useDateField} from '@react-aria/datepicker';
-import {LabelProvider} from './Label';
-import {DateFieldProvider, DateField, DateInput} from './DateField';
-import {ButtonProvider} from './Button';
-import {DialogProvider} from './Dialog';
-import {CalendarProvider} from './Calendar';
-import {PopoverProvider} from './Popover';
+import {LabelContext} from './Label';
+import {DateFieldContext, DateField, DateInput} from './DateField';
+import {ButtonContext} from './Button';
+import {DialogContext} from './Dialog';
+import {CalendarContext} from './Calendar';
+import {PopoverContext} from './Popover';
 import {useLocale} from 'react-aria';
 import {createCalendar} from '@internationalized/date';
-import {GroupProvider} from './Group';
+import {GroupContext} from './Group';
+import {Provider} from './utils';
 
 export function DatePicker(props) {
   let state = useDatePickerState(props);
@@ -20,11 +21,12 @@ export function DatePicker(props) {
     labelProps,
     fieldProps,
     buttonProps,
-    dialogProps
+    dialogProps,
+    calendarProps
   } = useDatePicker({...props, label: 's'}, state, groupRef);
   
   let {locale} = useLocale();
-  let fieldState = useDatePickerFieldState({
+  let fieldState = useDateFieldState({
     ...fieldProps,
     value: state.value,
     onChange: state.setValue,
@@ -36,21 +38,18 @@ export function DatePicker(props) {
   let { fieldProps: dateFieldProps } = useDateField({...fieldProps, label: 's'}, fieldState, fieldRef);
   
   return (
-    <GroupProvider {...groupProps} groupRef={groupRef}>
-      <DateFieldProvider state={fieldState} fieldProps={dateFieldProps} fieldRef={fieldRef}>
-        <ButtonProvider {...buttonProps} onPress={() => state.setOpen(true)}>
-          <LabelProvider {...labelProps}>
-            <CalendarProvider autoFocus value={state.dateValue} onChange={state.setDateValue}>
-              <PopoverProvider state={state} triggerRef={groupRef}>
-                <DialogProvider {...dialogProps}>
-                  {props.children}
-                </DialogProvider>
-              </PopoverProvider>
-            </CalendarProvider>
-          </LabelProvider>
-        </ButtonProvider>
-      </DateFieldProvider>
-    </GroupProvider>
+    <Provider
+      values={[
+        [GroupContext, {...groupProps, groupRef}],
+        [DateFieldContext, {state: fieldState, fieldProps: dateFieldProps, fieldRef}],
+        [ButtonContext, buttonProps],
+        [LabelContext, labelProps],
+        [CalendarContext, calendarProps],
+        [PopoverContext, {state, triggerRef: groupRef}],
+        [DialogContext, dialogProps]
+      ]}>
+      {props.children}
+    </Provider>
   );
 }
 
@@ -66,32 +65,30 @@ export function DateRangePicker(props) {
     startFieldProps,
     endFieldProps,
     buttonProps,
-    dialogProps
+    dialogProps,
+    calendarProps
   } = useDateRangePicker({...props, label: 's'}, state, groupRef);
   
   return (
-    <DateRangePickerContext.Provider value={{state, startFieldProps, endFieldProps}}>
-      <GroupProvider {...groupProps} groupRef={groupRef}>
-        <ButtonProvider {...buttonProps} onPress={() => state.setOpen(true)}>
-          <LabelProvider {...labelProps}>
-            <CalendarProvider autoFocus value={state.dateRange} onChange={state.setDateRange}>
-              <PopoverProvider state={state} triggerRef={groupRef}>
-                <DialogProvider {...dialogProps}>
-                  {props.children}
-                </DialogProvider>
-              </PopoverProvider>
-            </CalendarProvider>
-          </LabelProvider>
-        </ButtonProvider>
-      </GroupProvider>
-    </DateRangePickerContext.Provider>
+    <Provider
+      values={[
+        [DateRangePickerContext, {state, startFieldProps, endFieldProps}],
+        [GroupContext, {...groupProps, groupRef}],
+        [ButtonContext, buttonProps],
+        [LabelContext, labelProps],
+        [CalendarContext, calendarProps],
+        [PopoverContext, {state, triggerRef: groupRef}],
+        [DialogContext, dialogProps]
+      ]}>
+      {props.children}
+    </Provider>
   );
 }
 
 export function StartDateInput(props) {
   let {state, startFieldProps} = useContext(DateRangePickerContext);
   return (
-    <DateField {...startFieldProps} value={state.value?.start} onChange={start => state.setDateTime('start', start)}>
+    <DateField {...startFieldProps}>
       <DateInput {...props} />
     </DateField>
   );
@@ -100,7 +97,7 @@ export function StartDateInput(props) {
 export function EndDateInput(props) {
   let {state, endFieldProps} = useContext(DateRangePickerContext);
   return (
-    <DateField {...endFieldProps} value={state.value?.end} onChange={start => state.setDateTime('end', start)}>
+    <DateField {...endFieldProps}>
       <DateInput {...props} />
     </DateField>
   );

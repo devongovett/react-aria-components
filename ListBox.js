@@ -6,19 +6,12 @@ import {
   useOption,
   mergeProps,
 } from 'react-aria';
+import {useRenderProps} from './utils';
 
-const ListBoxContext = createContext();
-
-export function ListBoxProvider({children, ...value}) {
-  return (
-    <ListBoxContext.Provider value={value}>
-      {children}
-    </ListBoxContext.Provider>
-  );
-}
+export const ListBoxContext = createContext();
 
 export function ListBox(props) {
-  let {state, setListBoxProps, listBoxRef, ...otherProps} = useContext(ListBoxContext) || {};
+  let {state, setListBoxProps, listBoxRef, hidden, ...otherProps} = useContext(ListBoxContext) || {};
   useEffect(() => {
     if (setListBoxProps) {
       setListBoxProps(props);
@@ -27,10 +20,13 @@ export function ListBox(props) {
 
   props = mergeProps(otherProps, props);
 
-  // let state = useListState(props);
+  return !state || state.isOpen ? <ListBoxInner state={state} props={props} listBoxRef={listBoxRef} /> : null;
+}
 
+function ListBoxInner({state, props, listBoxRef}) {
   let ref = useRef();
   ref = listBoxRef || ref;
+  state = state || useListState(props);
   let { listBoxProps, labelProps } = useListBox(props, state, ref);
 
   return (
@@ -64,41 +60,21 @@ function Option({ item, state }) {
   // focus ring for accessibility
   // let { isFocusVisible, focusProps } = useFocusRing();
 
-  let className = item.props.className;
-  if (typeof className === 'function') {
-    className = className({
+  let renderProps = useRenderProps({
+    className: item.props.className,
+    style: item.props.style,
+    children: item.rendered,
+    values: {
       isFocused,
       isSelected,
       isDisabled
-    });
-  }
-
-  let style = item.props.style;
-  if (typeof style === 'function') {
-    style = style({
-      isFocused,
-      isSelected,
-      isDisabled
-    });
-  }
-
-  let rendered = item.rendered;
-  if (typeof rendered === 'function') {
-    rendered = rendered({
-      isFocused,
-      isSelected,
-      isDisabled
-    });
-  }
+    }
+  });
 
   return (
     <li
-      {...mergeProps(optionProps)}
-      ref={ref}
-      style={style}
-      className={className}>
-      {rendered}
-    </li>
+      {...mergeProps(optionProps, renderProps)}
+      ref={ref} />
   );
 }
 

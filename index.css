@@ -1,5 +1,6 @@
 html {
   color-scheme: dark light;
+  font-family: system-ui;
 }
 
 .menu {
@@ -22,6 +23,11 @@ html {
 
 .item.focused {
   background: gray;
+  color: white;
+}
+
+.item.selected {
+  background: purple;
   color: white;
 }
 

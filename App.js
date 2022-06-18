@@ -60,6 +60,11 @@ export function App() {
           </ListBox>
         </Popover>
       </ComboBox>
+      <ListBox className="menu" selectionMode="multiple" selectionBehavior="replace">
+        <Item className={itemClass}>Foo</Item>
+        <Item className={itemClass}>Bar</Item>
+        <Item className={itemClass}>Baz</Item>
+      </ListBox>
       <Slider
         defaultValue={[30, 60]}
         style={{
@@ -94,7 +99,7 @@ export function App() {
           <CustomThumb index={1} />
         </Track>
       </Slider>
-      <NumberField>
+      <NumberField formatOptions={{style: 'currency', currency: 'USD'}}>
         <Label>Test</Label>
         <Group style={{display: 'flex'}}>
           <DecrementButton>-</DecrementButton>
@@ -183,8 +188,8 @@ export function App() {
           <CalendarNextButton>&gt;</CalendarNextButton>
         </div>
         <CalendarGrid style={{ width: "100%" }}>
-          {({ formattedDate, isSelected, isOutsideMonth }) => (
-            <div hidden={isOutsideMonth} style={{textAlign: 'center', cursor: 'default', background: isSelected ? 'blue' : ''}}>
+          {({ formattedDate, isSelected, isOutsideVisibleRange }) => (
+            <div hidden={isOutsideVisibleRange} style={{textAlign: 'center', cursor: 'default', background: isSelected ? 'blue' : ''}}>
               {formattedDate}
             </div>
           )}
@@ -197,8 +202,8 @@ export function App() {
           <CalendarNextButton>&gt;</CalendarNextButton>
         </div>
         <CalendarGrid style={{ width: "100%" }}>
-          {({ formattedDate, isSelected, isOutsideMonth }) => (
-            <div hidden={isOutsideMonth} style={{textAlign: 'center', cursor: 'default', background: isSelected ? 'blue' : ''}}>
+          {({ formattedDate, isSelected, isOutsideVisibleRange }) => (
+            <div hidden={isOutsideVisibleRange} style={{textAlign: 'center', cursor: 'default', background: isSelected ? 'blue' : ''}}>
               {formattedDate}
             </div>
           )}
@@ -237,8 +242,8 @@ export function App() {
               <CalendarNextButton>&gt;</CalendarNextButton>
             </div>
             <CalendarGrid style={{ width: "100%" }}>
-              {({ formattedDate, isSelected, isOutsideMonth }) => (
-                <div hidden={isOutsideMonth} style={{textAlign: 'center', cursor: 'default', background: isSelected ? 'blue' : ''}}>
+              {({ formattedDate, isSelected, isOutsideVisibleRange }) => (
+                <div hidden={isOutsideVisibleRange} style={{textAlign: 'center', cursor: 'default', background: isSelected ? 'blue' : ''}}>
                   {formattedDate}
                 </div>
               )}
@@ -253,7 +258,7 @@ export function App() {
             <StartDateInput style={{display: 'inline-flex'}}>
               {segment => <DateSegment segment={segment} className={clsx('segment', {placeholder: segment.isPlaceholder})} />}
             </StartDateInput>
-            <span style={{padding: '0 4px'}}>–</span>
+            <span aria-hidden="true" style={{padding: '0 4px'}}>–</span>
             <EndDateInput style={{display: 'inline-flex'}}>
               {segment => <DateSegment segment={segment} className={clsx('segment', {placeholder: segment.isPlaceholder})} />}
             </EndDateInput>
@@ -273,8 +278,8 @@ export function App() {
               <CalendarNextButton>&gt;</CalendarNextButton>
             </div>
             <CalendarGrid style={{ width: "100%" }}>
-              {({ formattedDate, isSelected, isOutsideMonth }) => (
-                <div hidden={isOutsideMonth} style={{textAlign: 'center', cursor: 'default', background: isSelected ? 'blue' : ''}}>
+              {({ formattedDate, isSelected, isOutsideVisibleRange }) => (
+                <div hidden={isOutsideVisibleRange} style={{textAlign: 'center', cursor: 'default', background: isSelected ? 'blue' : ''}}>
                   {formattedDate}
                 </div>
               )}
@@ -286,9 +291,10 @@ export function App() {
   );
 }
 
-function itemClass({isFocused}) {
+function itemClass({isFocused, isSelected}) {
   return clsx('item', {
-    focused: isFocused
+    focused: isFocused,
+    selected: isSelected
   })
 }
 
@@ -296,12 +302,12 @@ function CustomThumb({index}) {
   return (
     <Thumb
       index={index}
-      style={({isDragging}) => ({
+      style={({isDragging, isFocusVisible}) => ({
         width: 20,
         height: 20,
         borderRadius: '50%',
         top: 4,
-        backgroundColor: isDragging
+        backgroundColor: isFocusVisible ? 'orange' : isDragging
           ? 'dimgrey'
           : 'gray'
       })} />

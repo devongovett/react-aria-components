@@ -1,15 +1,7 @@
 import {createContext, useContext, useRef} from 'react';
 import {useOverlay, useOverlayPosition, useModal, FocusScope, mergeProps, DismissButton, OverlayContainer} from 'react-aria';
 
-const PopoverContext = createContext();
-
-export function PopoverProvider({children, ...value}) {
-  return (
-    <PopoverContext.Provider value={value}>
-      {children}
-    </PopoverContext.Provider>
-  );
-}
+export const PopoverContext = createContext();
 
 export function Popover(props) {
   let {popoverRef, triggerRef, preserveChildren, restoreFocus = true, state} = useContext(PopoverContext);
@@ -23,10 +15,7 @@ export function Popover(props) {
   // let { dialogProps } = useDialog(props, popoverRef);
 
   if (!isOpen) {
-    if (preserveChildren) {
-      return <div hidden>{children}</div>;
-    }
-    return null;
+    return preserveChildren ? children : null;
   }
 
   return (

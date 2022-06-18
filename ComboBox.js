@@ -1,11 +1,15 @@
 import {useRef, useState} from 'react';
 import {useComboBoxState} from 'react-stately';
 import {useComboBox, useFilter} from 'react-aria';
-import {PopoverProvider} from './Popover';
-import {ButtonProvider} from './Button';
-import {ListBoxProvider} from './ListBox';
-import {LabelProvider} from './Label';
-import {InputProvider} from './Input';
+import {PopoverContext} from './Popover';
+import {ButtonContext} from './Button';
+import {ListBoxContext} from './ListBox';
+import {LabelContext} from './Label';
+import {InputContext} from './Input';
+import {Provider} from './utils';
+// import * as lodash from 'lodash-es';
+
+// console.log(lodash);
 
 export function ComboBox(props) {
   let [propsFromListBox, setListBoxProps] = useState(null);
@@ -42,16 +46,15 @@ export function ComboBox(props) {
   );
 
   return (
-    <LabelProvider {...labelProps}>
-      <ButtonProvider {...buttonProps} buttonRef={buttonRef}>
-        <InputProvider {...inputProps} inputRef={inputRef}>
-          <PopoverProvider state={state} popoverRef={popoverRef} triggerRef={buttonRef} preserveChildren>
-            <ListBoxProvider state={state} setListBoxProps={setListBoxProps} {...listBoxProps} listBoxRef={listBoxRef}>
-              {props.children}
-            </ListBoxProvider>
-          </PopoverProvider>
-        </InputProvider>
-      </ButtonProvider>
-    </LabelProvider>
+    <Provider
+      values={[
+        [LabelContext, labelProps],
+        [ButtonContext, {...buttonProps, buttonRef}],
+        [InputContext, {...inputProps, inputRef}],
+        [PopoverContext, {state, popoverRef, triggerRef: inputRef, preserveChildren: true}],
+        [ListBoxContext, {state, setListBoxProps, ...listBoxProps, listBoxRef}]
+      ]}>
+      {props.children}
+    </Provider>
   );
 }
