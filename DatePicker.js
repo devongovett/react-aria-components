@@ -1,6 +1,6 @@
 import {useRef, createContext, useContext} from 'react';
-import {useDatePickerState, useDateFieldState, useDateRangePickerState} from '@react-stately/datepicker';
-import {useDatePicker, useDateRangePicker, useDateField} from '@react-aria/datepicker';
+import {useDatePickerState, useDateFieldState, useDateRangePickerState} from 'react-stately';
+import {useDatePicker, useDateRangePicker, useDateField} from 'react-aria';
 import {LabelContext} from './Label';
 import {DateFieldContext, DateField, DateInput} from './DateField';
 import {ButtonContext} from './Button';

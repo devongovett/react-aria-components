@@ -1,6 +1,6 @@
 import {useRef, cloneElement, createContext, useContext, useMemo} from 'react';
-import {useCalendarState, useRangeCalendarState} from '@react-stately/calendar';
-import {useCalendar, useRangeCalendar, useCalendarGrid, useCalendarCell} from '@react-aria/calendar';
+import {useCalendarState, useRangeCalendarState} from 'react-stately';
+import {useCalendar, useRangeCalendar, useCalendarGrid, useCalendarCell} from 'react-aria';
 import {useLocale, VisuallyHidden, useDateFormatter, mergeProps} from 'react-aria';
 import {createCalendar, startOfWeek, getWeeksInMonth} from '@internationalized/date';
 import {Button} from './Button';

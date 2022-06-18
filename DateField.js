@@ -1,6 +1,6 @@
 import {useRef, createContext, useContext, cloneElement} from 'react';
-import {useDateFieldState, useTimeFieldState} from '@react-stately/datepicker';
-import {useDateField, useDateSegment} from '@react-aria/datepicker';
+import {useDateFieldState, useTimeFieldState} from 'react-stately';
+import {useDateField, useDateSegment} from 'react-aria';
 import {useLocale, FocusScope} from 'react-aria';
 import {createCalendar} from '@internationalized/date';
 import {LabelContext} from './Label';
