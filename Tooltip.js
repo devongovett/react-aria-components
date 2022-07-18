@@ -57,14 +57,20 @@ function TooltipInner(props) {
   let {tooltipProps} = useTooltip(props, state);
     
   return (
-    <span {...tooltipProps} ref={overlayRef} {...renderProps} style={{...renderProps.style, ...overlayProps.style}} />
+    <div {...tooltipProps} ref={overlayRef} {...renderProps} style={{...renderProps.style, ...overlayProps.style}} />
   );
 }
 
 export function Arrow(props) {
-  let {arrowProps} = useContext(TooltipContext);
+  let {arrowProps, placement} = useContext(TooltipContext);
+  let style = {
+    ...arrowProps.style,
+    position: 'absolute',
+    [placement]: '100%',
+    ...props.style
+  };
   
   return (
-    <span {...arrowProps} style={props.style} className={props.className}>{props.children}</span>
-  )
+    <div {...arrowProps} style={style} className={props.className}>{props.children}</div>
+  );
 }

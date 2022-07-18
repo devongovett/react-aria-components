@@ -4,13 +4,17 @@ html {
 }
 
 .menu {
-  display: inline-block;
+  display: block;
   min-width: 150px;
+  width: fit-content;
   margin: 4px 0 0 0;
-  padding: 0;
-  list-style: none;
   border: 1px solid gray;
   background: lightgray;
+}
+
+.menu, .group {
+  padding: 0;
+  list-style: none;
 }
 
 .item {

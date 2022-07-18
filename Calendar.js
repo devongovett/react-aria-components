@@ -6,7 +6,7 @@ import {createCalendar, startOfWeek, getWeeksInMonth} from '@internationalized/d
 import {Button} from './Button';
 import {useRenderProps} from './utils';
 
-export const CalendarContext = createContext();
+export const CalendarContext = createContext({});
 const InternalCalendarContext = createContext();
 
 export function Calendar(props) {
@@ -121,7 +121,6 @@ export function CalendarGrid(props) {
   if (props.offset) {
     startDate = startDate.add(props.offset);
   }
-  let monthStart = startOfWeek(startDate, locale);
   let weeksInMonth = getWeeksInMonth(startDate, locale);
 
   return (
@@ -134,14 +133,18 @@ export function CalendarGrid(props) {
       <tbody>
         {[...new Array(weeksInMonth).keys()].map((weekIndex) => (
           <tr key={weekIndex}>
-            {[...new Array(7).keys()].map((dayIndex) => (
-              <CalendarCell
-                key={dayIndex}
-                state={state}
-                date={monthStart.add({ weeks: weekIndex, days: dayIndex })}
-                currentMonth={startDate}
-                render={props.children}
-              />
+            {state.getDatesInWeek(weekIndex).map((date, i) => (
+              date
+                ? (
+                  <CalendarCell
+                    key={i}
+                    state={state}
+                    date={date}
+                    currentMonth={startDate}
+                    render={props.children}
+                  />
+                )
+                : <td key={i} />
             ))}
           </tr>
         ))}

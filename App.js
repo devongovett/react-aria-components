@@ -1,39 +1,152 @@
-import {MenuTrigger, Menu, Item} from './Menu';
+import {Item, Section} from 'react-stately';
+import {MenuTrigger, Menu, MenuSection, MenuItem} from './Menu';
+import { Separator } from "./Separator";
 import {Button} from './Button';
 import {Popover} from './Popover';
 import clsx from 'clsx';
 import {OverlayProvider} from 'react-aria';
-import {Select, Value} from './Select';
-import {ListBox} from './ListBox';
+import {Select, SelectValue} from './Select';
+import {ListBox, Option} from './ListBox';
 import {ComboBox} from './ComboBox';
 import {Input} from './Input';
 import {Label} from './Label';
 import {Slider, Track, Thumb, Output} from './Slider';
 import {DialogTrigger, Modal, Dialog} from './Dialog';
-import {TooltipTrigger, Tooltip} from './Tooltip';
+import {TooltipTrigger, Tooltip, Arrow} from './Tooltip';
 import {NumberField, IncrementButton, DecrementButton} from './NumberField';
 import {Group} from './Group';
 import {Calendar, RangeCalendar, CalendarHeader, CalendarGrid, CalendarNextButton, CalendarPreviousButton} from './Calendar';
 import {DateField, TimeField, DateInput, DateSegment} from './DateField';
 import {DatePicker, DateRangePicker, StartDateInput, EndDateInput} from './DatePicker';
 
+function MyListBox(props) {
+  return (
+    <ListBox 
+      className="menu" 
+      {...props}
+      renderItem={item => (
+        <Option item={item} className={itemClass}>
+          {({isSelected}) => <>{item.rendered}{isSelected ? ' (selected)' : ''}</>}
+        </Option>
+      )} />
+  );
+}
+
+function MyComboBox({label, items, children, ...props}) {
+  return (
+    <ComboBox {...props}>
+      <Label style={{display: 'block'}}>{label}</Label>
+      <div style={{display: 'flex'}}>
+        <Input />
+        <Button>
+          <span aria-hidden="true" style={{ padding: '0 2px' }}>▼</span>
+        </Button>
+      </div>
+      <Popover placement="bottom end">
+        <ListBox
+          className="menu"
+          renderItem={item => (
+            <Option item={item} className={itemClass}>
+              {({isSelected}) => <>{item.rendered}{isSelected ? ' (selected)' : ''}</>}
+            </Option>
+          )}>
+          {children}
+        </ListBox>
+      </Popover>
+    </ComboBox>
+  );
+}
+
+function MyMenu(props) {
+  return (
+    <Menu 
+      className="menu"
+      {...props}
+      renderSection={section => (
+        <MenuSection section={section} className="group">
+          <span style={{fontSize: '1.2em'}}>{section.rendered}</span>
+        </MenuSection>
+      )}
+      renderSeparator={() => <Separator style={{borderTop: '1px solid gray', margin: '2px 5px'}} />}
+      renderItem={item => (
+        <MenuItem item={item} className={itemClass} />
+      )} />
+  );
+}
+
+import React from 'react';
+import { Heading } from './Heading';
+function Example() {
+  let options = [
+    {id: 1, name: 'Aerospace'},
+    {id: 2, name: 'Mechanical'},
+    {id: 3, name: 'Civil'},
+    {id: 4, name: 'Biomedical'},
+    {id: 5, name: 'Nuclear'},
+    {id: 6, name: 'Industrial'},
+    {id: 7, name: 'Chemical'},
+    {id: 8, name: 'Agricultural'},
+    {id: 9, name: 'Electrical'}
+  ];
+  let [majorId, setMajorId] = React.useState();
+
+  return (
+    <>
+      <MyComboBox
+        label="Pick a engineering major"
+        defaultItems={options}
+        onSelectionChange={setMajorId}>
+        {(item) => <Item>{item.name}</Item>}
+      </MyComboBox>
+      <p>Selected topic id: {majorId}</p>
+    </>
+  );
+}
+
 export function App() {
   return (
     <OverlayProvider>
+      <Example />
       <MenuTrigger>
-        <Button>Hi</Button>
+        <Button aria-label="Menu">☰</Button>
         <Popover>
           <Menu className="menu">
-            <Item className={itemClass}>Foo</Item>
-            <Item className={itemClass}>Bar</Item>
-            <Item className={itemClass}>Baz</Item>
+            <Section title={<span style={{fontSize: '1.2em'}}>Section 1</span>} className="group">
+              <Item className={itemClass}>Foo</Item>
+              <Item className={itemClass}>Bar</Item>
+              <Item className={itemClass}>Baz</Item>
+            </Section>
+            <Separator style={{borderTop: '1px solid gray', margin: '2px 5px'}} />
+            <Section title={<span style={{fontSize: '1.2em'}}>Section 2</span>} className="group">
+              <Item className={itemClass}>Foo</Item>
+              <Item className={itemClass}>Bar</Item>
+              <Item className={itemClass}>Baz</Item>
+            </Section>
           </Menu>
+        </Popover>
+      </MenuTrigger>
+      <MenuTrigger>
+        <Button aria-label="Menu">☰</Button>
+        <Popover>
+          <MyMenu>
+            <Section title="Section 1">
+              <Item>Foo</Item>
+              <Item>Bar</Item>
+              <Item >Baz</Item>
+            </Section>
+            <Separator />
+            <Section title="Section 2">
+              <Item>Foo</Item>
+              <Item>Bar</Item>
+              <Item>Baz</Item>
+            </Section>
+          </MyMenu>
         </Popover>
       </MenuTrigger>
       <Select>
         <Label style={{display: 'block'}}>Test</Label>
         <Button>
-          <Value />
+          <SelectValue />
           <span aria-hidden="true" style={{ paddingLeft: 5 }}>▼</span>
         </Button>
         <Popover>
@@ -60,11 +173,21 @@ export function App() {
           </ListBox>
         </Popover>
       </ComboBox>
+      <MyComboBox label="Test">
+        <Item>One</Item>
+        <Item>Two</Item>
+        <Item>Three</Item>
+      </MyComboBox>
       <ListBox className="menu" selectionMode="multiple" selectionBehavior="replace">
         <Item className={itemClass}>Foo</Item>
         <Item className={itemClass}>Bar</Item>
         <Item className={itemClass}>Baz</Item>
       </ListBox>
+      <MyListBox selectionMode="multiple" selectionBehavior="replace">
+        <Item>One</Item>
+        <Item>Two</Item>
+        <Item>Three</Item>
+      </MyListBox>
       <Slider
         defaultValue={[30, 60]}
         style={{
@@ -130,6 +253,7 @@ export function App() {
           }}>
             {({close}) => (
               <form style={{display: 'flex', flexDirection: 'column'}}>
+                <Heading style={{marginTop: 0}}>Sign up</Heading>
                 <label>
                   First Name: <input placeholder="John" />
                 </label>
@@ -176,8 +300,14 @@ export function App() {
             background: 'Canvas',
             color: 'CanvasText',
             border: '1px solid gray',
-            padding: 5
+            padding: 5,
+            borderRadius: 4
           }}>
+          <Arrow style={{transform: 'translateX(-50%)'}}>
+            <svg width="8" height="8">
+              <path d="M0 0,L4 4,L8 0" fill="white" strokeWidth={1} stroke="gray" />
+            </svg>
+          </Arrow>
           I am a tooltip
         </Tooltip>
       </TooltipTrigger>
@@ -306,7 +436,7 @@ function CustomThumb({index}) {
         width: 20,
         height: 20,
         borderRadius: '50%',
-        top: 4,
+        top: '50%',
         backgroundColor: isFocusVisible ? 'orange' : isDragging
           ? 'dimgrey'
           : 'gray'

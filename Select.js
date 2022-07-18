@@ -55,7 +55,7 @@ export function Select(props) {
   );
 }
 
-export function Value(props) {
+export function SelectValue(props) {
   let {state, valueProps} = useContext(SelectContext);
   let renderProps = useRenderProps({
     ...props,

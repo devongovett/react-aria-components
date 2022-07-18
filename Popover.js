@@ -4,42 +4,41 @@ import {useOverlay, useOverlayPosition, useModal, FocusScope, mergeProps, Dismis
 export const PopoverContext = createContext();
 
 export function Popover(props) {
-  let {popoverRef, triggerRef, preserveChildren, restoreFocus = true, state} = useContext(PopoverContext);
+  let context = useContext(PopoverContext);
+  props = mergeProps(props, context);
+  let {popoverRef, triggerRef, children, preserveChildren, restoreFocus = true, state} = props;
   let ref = useRef();
   popoverRef = popoverRef || ref;
-  let { isOpen = state.isOpen, children, onClose = state.close } = props;
-  // if (!isOpen) {
-  //   return null;
-  // }
 
-  // let { dialogProps } = useDialog(props, popoverRef);
-
-  if (!isOpen) {
+  if (!state.isOpen) {
     return preserveChildren ? children : null;
   }
 
   return (
     <OverlayContainer>
       <Overlay 
-        isOpen={isOpen}
-        onClose={onClose}
+        {...props}
         triggerRef={triggerRef}
         popoverRef={popoverRef}
         restoreFocus={restoreFocus}
-        placement={props.placement}
-        style={props.style}
-        className={props.className}>{children}</Overlay>
+        state={state}>
+        {children}
+      </Overlay>
     </OverlayContainer>
   );
 }
 
-function Overlay({children, isOpen, onClose, triggerRef, popoverRef, placement, restoreFocus, className, style}) {
-  // Handle events that should cause the popup to close,
-  // e.g. blur, clicking outside, or pressing the escape key.
+function usePopover({
+  triggerRef,
+  popoverRef,
+  placement = 'top',
+  offset = 5,
+  isNonModal,
+}, state) {
   let { overlayProps } = useOverlay(
     {
-      isOpen,
-      onClose,
+      isOpen: state.isOpen,
+      onClose: state.close,
       shouldCloseOnBlur: true,
       isDismissable: true
     },
@@ -49,27 +48,37 @@ function Overlay({children, isOpen, onClose, triggerRef, popoverRef, placement, 
   let { overlayProps: positionProps } = useOverlayPosition({
     targetRef: triggerRef,
     overlayRef: popoverRef,
-    placement: placement || 'top',
-    offset: 5,
-    isOpen
+    placement,
+    offset,
+    isOpen: state.isOpen
   });
 
   let { modalProps } = useModal({
-    isDisabled: !isOpen
+    isDisabled: isNonModal || !state.isOpen
   });
+
+  // TODO: useFocusScope
+
+  return {
+    popoverProps: mergeProps(overlayProps, positionProps, modalProps)
+  };
+}
+
+function Overlay({children, restoreFocus, className, style, state, ...props}) {
+  let {popoverProps} = usePopover(props, state);
   
-  style = {...style, ...positionProps.style};
+  style = {...style, ...popoverProps.style};
 
   return (
     <FocusScope restoreFocus={restoreFocus}>
       <div
-        {...mergeProps(overlayProps, positionProps, modalProps)}
-        ref={popoverRef}
+        {...popoverProps}
+        ref={props.popoverRef}
         className={className}
         style={style}>
-        <DismissButton onDismiss={onClose} />
+        <DismissButton onDismiss={state.close} />
         {children}
-        <DismissButton onDismiss={onClose} />
+        <DismissButton onDismiss={state.close} />
       </div>
     </FocusScope>
   );

@@ -1,4 +1,4 @@
-import {createContext, useRef, useContext, useEffect} from 'react';
+import {cloneElement, createContext, useRef, useContext, useEffect} from 'react';
 
 import {useListState, Item} from 'react-stately';
 import {
@@ -8,10 +8,11 @@ import {
 } from 'react-aria';
 import {useRenderProps} from './utils';
 
-export const ListBoxContext = createContext();
+export const ListBoxContext = createContext({});
+const InternalListBoxContext = createContext();
 
 export function ListBox(props) {
-  let {state, setListBoxProps, listBoxRef, hidden, ...otherProps} = useContext(ListBoxContext) || {};
+  let {state, setListBoxProps, listBoxRef, hidden, ...otherProps} = useContext(ListBoxContext);
   useEffect(() => {
     if (setListBoxProps) {
       setListBoxProps(props);
@@ -19,7 +20,6 @@ export function ListBox(props) {
   }, [props]);
 
   props = mergeProps(otherProps, props);
-
   return !state || state.isOpen ? <ListBoxInner state={state} props={props} listBoxRef={listBoxRef} /> : null;
 }
 
@@ -29,28 +29,25 @@ function ListBoxInner({state, props, listBoxRef}) {
   state = state || useListState(props);
   let { listBoxProps, labelProps } = useListBox(props, state, ref);
 
+  let renderItem = props.renderItem || ((item) => <Option item={item} />);
+
   return (
     <ul
       {...listBoxProps}
       ref={ref}
       style={props.style}
       className={props.className}>
-      {[...state.collection].map((item) => (
-        <Option
-          key={item.key}
-          item={item}
-          state={state}
-        />
-      ))}
+      <InternalListBoxContext.Provider value={{state}}>
+        {[...state.collection].map(item => cloneElement(renderItem(item), {key: item.key}))}
+      </InternalListBoxContext.Provider>
     </ul>
   );
 }
 
-function Option({ item, state }) {
-  // Get props for the option element
+export function Option({ item, className, style, children }) {
   let ref = useRef();
-  let isFocused = state.selectionManager.focusedKey === item.key;
-  let { optionProps, isSelected, isDisabled } = useOption(
+  let {state} = useContext(InternalListBoxContext);
+  let { optionProps, isSelected, isDisabled, isFocused } = useOption(
     { key: item.key },
     state,
     ref
@@ -61,9 +58,9 @@ function Option({ item, state }) {
   // let { isFocusVisible, focusProps } = useFocusRing();
 
   let renderProps = useRenderProps({
-    className: item.props.className,
-    style: item.props.style,
-    children: item.rendered,
+    className: className || item.props.className,
+    style: style || item.props.style,
+    children: children || item.rendered,
     values: {
       isFocused,
       isSelected,

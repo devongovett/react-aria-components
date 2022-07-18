@@ -66,13 +66,12 @@ export function Thumb(props) {
   let {state, trackRef} = useContext(SliderContext);
   let { index = 0 } = props;
   let inputRef = useRef(null);
-  let { thumbProps, inputProps } = useSliderThumb({
+  let { thumbProps, inputProps, isDragging } = useSliderThumb({
     index,
     trackRef,
     inputRef
   }, state);
 
-  let isDragging = state.isThumbDragging(index);
   let {focusProps, isFocusVisible} = useFocusRing();
 
   let renderProps = useRenderProps({
@@ -82,16 +81,7 @@ export function Thumb(props) {
   });
 
   return (
-    <div
-      {...thumbProps}
-      {...renderProps}
-      style={{
-        position: 'absolute',
-        transform: 'translateX(-50%)',
-        left: `${state.getThumbPercent(index) * 100}%`,
-        ...renderProps.style
-      }}
-    >
+    <div {...thumbProps} {...renderProps} style={{...thumbProps.style, ...renderProps.style}}>
       <VisuallyHidden>
         <input ref={inputRef} {...mergeProps(inputProps, focusProps)} />
       </VisuallyHidden>

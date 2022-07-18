@@ -7,24 +7,19 @@ import {ListBoxContext} from './ListBox';
 import {LabelContext} from './Label';
 import {InputContext} from './Input';
 import {Provider} from './utils';
-// import * as lodash from 'lodash-es';
-
-// console.log(lodash);
 
 export function ComboBox(props) {
   let [propsFromListBox, setListBoxProps] = useState(null);
 
-  // Create state based on the incoming props
   let { contains } = useFilter({ sensitivity: 'base' });
   let state = useComboBoxState({
     defaultFilter: contains,
     ...props,
-    items: propsFromListBox ? undefined : [],
+    items: propsFromListBox ? props.items : [],
     children: () => {},
     ...propsFromListBox
   });
 
-  // Get props for child elements from useSelect
   let buttonRef = useRef(null);
   let inputRef = useRef(null);
   let listBoxRef = useRef(null);
@@ -51,7 +46,7 @@ export function ComboBox(props) {
         [LabelContext, labelProps],
         [ButtonContext, {...buttonProps, buttonRef}],
         [InputContext, {...inputProps, inputRef}],
-        [PopoverContext, {state, popoverRef, triggerRef: inputRef, preserveChildren: true}],
+        [PopoverContext, {state, popoverRef, triggerRef: inputRef, preserveChildren: true, isNonModal: true}],
         [ListBoxContext, {state, setListBoxProps, ...listBoxProps, listBoxRef}]
       ]}>
       {props.children}
