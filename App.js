@@ -6,7 +6,7 @@ import {Popover} from './Popover';
 import clsx from 'clsx';
 import {OverlayProvider} from 'react-aria';
 import {Select, SelectValue} from './Select';
-import {ListBox, Option} from './ListBox';
+import {ListBox, Option, ListBoxItem} from './ListBox';
 import {ComboBox} from './ComboBox';
 import {Input} from './Input';
 import {Label} from './Label';
@@ -18,6 +18,52 @@ import {Group} from './Group';
 import {Calendar, RangeCalendar, CalendarHeader, CalendarGrid, CalendarNextButton, CalendarPreviousButton} from './Calendar';
 import {DateField, TimeField, DateInput, DateSegment} from './DateField';
 import {DatePicker, DateRangePicker, StartDateInput, EndDateInput} from './DatePicker';
+import React from 'react';
+import { Heading } from './Heading';
+
+const TestContext = React.createContext()
+
+function MyItem(props) {
+  // let ctx = React.useContext(TestContext);
+  // let children = typeof props.children === 'string' ? props.children + ' (' + ctx + ')' : props.children
+  console.log('render', props.children);
+  return <option multiple={{...props, className: itemClass, rendered: props.children}} />;
+}
+
+function MySection(props) {
+  // let ctx = React.useContext(TestContext);
+  // let children = typeof props.children === 'string' ? props.children + ' (' + ctx + ')' : props.children
+  return <optgroup multiple={{...props, className: 'group', rendered: <span style={{fontSize: '1.2em'}}>{props.title}</span>}}>{props.children}</optgroup>;
+}
+
+function MyMultiItem() {
+  let ctx = React.useContext(TestContext);
+  return <>
+    <MyItem>One</MyItem>
+    <MyItem>Two</MyItem>
+    {ctx > 0 && <MyItem>Another conditional</MyItem>}
+  </>
+}
+
+function CounterItem() {
+  let [counter, setCount] = React.useState(0);
+  
+  React.useEffect(() => {
+    let update = () => {
+      setCount(c => c + 1);
+    };
+
+    // let interval = setInterval(update, 1000);
+    // return () => clearInterval(interval);
+  }, []);
+
+  return <MyItem>{'' + counter}</MyItem>
+}
+
+function FancyChild() {
+  let ctx = React.useContext(TestContext);
+  return 'FancyChild: ' + ctx;
+}
 
 function MyListBox(props) {
   return (
@@ -74,8 +120,6 @@ function MyMenu(props) {
   );
 }
 
-import React from 'react';
-import { Heading } from './Heading';
 function Example() {
   let options = [
     {id: 1, name: 'Aerospace'},
@@ -103,10 +147,38 @@ function Example() {
   );
 }
 
+let test = 10;
+
+const Test = React.memo(({items}) => {
+  return (
+    <ListBox items={items} aria-label="Test" className="menu" selectionMode="multiple" selectionBehavior="replace">
+      {/* <TestContext.Provider value="hi">
+        <MyItem textValue="Fancy"><FancyChild /></MyItem>
+      </TestContext.Provider> */}
+      {/* <MyItem textValue="Fancy"><FancyChild /></MyItem> */}
+      {/* <MyItem textValue="Fancy"><FancyChild /></MyItem>
+      <MyItem>Bar</MyItem>
+      <MyMultiItem />
+      <CounterItem />
+      <MyItem>Baz</MyItem> */}
+      {/* {items.map(item => <MyItem key={item.id}>{item.name}</MyItem>)} */}
+      {/* {cached.current} */}
+      {item => <MyItem key={item.name}>{() => item.name + ' ' + test}</MyItem>}
+      {/* <MySection title="Test">
+        <MyItem>One</MyItem>
+        <MyItem>Two</MyItem>
+      </MySection> */}
+    </ListBox>
+  )
+});
+
 export function App() {
+  let [count, setCount] = React.useState(0);
+  let [items, setItems] = React.useState([]);
+
   return (
     <OverlayProvider>
-      <Example />
+      {/* <Example />
       <MenuTrigger>
         <Button aria-label="Menu">☰</Button>
         <Popover>
@@ -177,13 +249,16 @@ export function App() {
         <Item>One</Item>
         <Item>Two</Item>
         <Item>Three</Item>
-      </MyComboBox>
-      <ListBox className="menu" selectionMode="multiple" selectionBehavior="replace">
-        <Item className={itemClass}>Foo</Item>
-        <Item className={itemClass}>Bar</Item>
-        <Item className={itemClass}>Baz</Item>
-      </ListBox>
-      <MyListBox selectionMode="multiple" selectionBehavior="replace">
+      </MyComboBox> */}
+      <button onClick={() => {
+        setCount(c => c + 1);
+        test++;
+        setItems(items => [...items, {name: 'Item ' + items.length}]);
+      }}>Increment</button>
+      <TestContext.Provider value={count}>
+        <Test items={items} />
+      </TestContext.Provider>
+      {/* <MyListBox selectionMode="multiple" selectionBehavior="replace">
         <Item>One</Item>
         <Item>Two</Item>
         <Item>Three</Item>
@@ -416,7 +491,7 @@ export function App() {
             </CalendarGrid>
           </RangeCalendar>
         </Popover>
-      </DateRangePicker>
+      </DateRangePicker> */}
     </OverlayProvider>
   );
 }
